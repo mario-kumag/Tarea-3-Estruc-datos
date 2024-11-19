@@ -1,10 +1,25 @@
+/**
+ * @file graph.c
+ * @brief Implementacion del modulo de grafo para el sistema de documentos.
+ *
+ * Este modulo gestiona la representacion del grafo de documentos y calcula el
+ * PageRank de cada documento basado en los enlaces entre ellos.
+ */
+
 #include "graph.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-Grafo grafo;
+Grafo grafo; ///< Estructura global que representa el grafo.
 
+/**
+ * @brief Inicializa el grafo con un numero especifico de documentos.
+ *
+ * Asigna espacio para las listas de adyacencia y establece los valores iniciales de PageRank.
+ *
+ * @param numDocs Numero de documentos que formaran parte del grafo.
+ */
 void inicializarGrafo(int numDocs) {
     grafo.numDocs = numDocs;
     for (int i = 0; i < numDocs; i++) {
@@ -13,6 +28,14 @@ void inicializarGrafo(int numDocs) {
     }
 }
 
+/**
+ * @brief Agrega un enlace dirigido en el grafo entre dos documentos.
+ *
+ * Crea un enlace del documento de origen al documento de destino en la lista de adyacencia.
+ *
+ * @param origen Identificador del documento de origen.
+ * @param destino Identificador del documento de destino.
+ */
 void agregarEnlace(int origen, int destino) {
     NodoGrafo *nuevo = malloc(sizeof(NodoGrafo));
     nuevo->docID = destino;
@@ -20,11 +43,21 @@ void agregarEnlace(int origen, int destino) {
     grafo.adyacencia[origen] = nuevo;
 }
 
+/**
+ * @brief Calcula el PageRank de cada documento en el grafo.
+ *
+ * Utiliza el metodo iterativo de PageRank con un factor de amortiguamiento y un numero fijo de iteraciones.
+ *
+ * @param dampingFactor Factor de amortiguamiento utilizado en el calculo.
+ * @param iteraciones Numero de iteraciones para refinar los valores de PageRank.
+ */
 void calcularPageRank(double dampingFactor, int iteraciones) {
+    // Inicializar PageRank uniforme
     for (int i = 0; i < grafo.numDocs; i++) {
         grafo.pageRank[i] = 1.0 / grafo.numDocs;
     }
 
+    // Iteraciones de refinamiento
     for (int iter = 0; iter < iteraciones; iter++) {
         double nuevoPageRank[MAX_DOCS] = {0};
         for (int i = 0; i < grafo.numDocs; i++) {
@@ -42,10 +75,23 @@ void calcularPageRank(double dampingFactor, int iteraciones) {
     }
 }
 
+/**
+ * @brief Obtiene el PageRank de un documento especifico.
+ *
+ * @param docID Identificador del documento.
+ * @return Valor del PageRank del documento.
+ */
 double obtenerPageRank(int docID) {
     return grafo.pageRank[docID];
 }
 
+/**
+ * @brief Muestra los documentos con los mayores valores de PageRank.
+ *
+ * Ordena los documentos por PageRank y muestra los n primeros.
+ *
+ * @param n Numero de documentos a mostrar.
+ */
 void mostrarTopPageRank(int n) {
     struct {
         double pageRank;
@@ -58,7 +104,7 @@ void mostrarTopPageRank(int n) {
         documentos[i].docID = i;
     }
 
-    // Ordenar los documentos por PageRank (burbuja por simplicidad)
+    // Ordenar los documentos por PageRank (ordenamiento burbuja)
     for (int i = 0; i < grafo.numDocs - 1; i++) {
         for (int j = 0; j < grafo.numDocs - i - 1; j++) {
             if (documentos[j].pageRank < documentos[j + 1].pageRank) {
